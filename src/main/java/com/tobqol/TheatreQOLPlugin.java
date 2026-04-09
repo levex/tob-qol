@@ -284,6 +284,7 @@ public class TheatreQOLPlugin extends Plugin
 	void reset(boolean global)
 	{
 		dataHandler.getData().clear();
+		dataHandler.resetTotalTime();
 
 		if (rooms != null)
 		{
@@ -314,7 +315,6 @@ public class TheatreQOLPlugin extends Plugin
 			lootTrackingHandler.reset();
 			instanceService.reset();
 			eventManager.getInstance().reset();
-			dataHandler.resetTotalTime();
 			removeTotalTimeInfoBox();
 		}
 	}
