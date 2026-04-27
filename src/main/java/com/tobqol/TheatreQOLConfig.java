@@ -129,6 +129,14 @@ public interface TheatreQOLConfig extends Config
 	)
 	String LOOT_TRACKING_SECTION = "lootTrackingSection";
 
+	@ConfigSection(
+			name = "Board Screenshot",
+			description = "Options for the TOB board screenshot button",
+			position = 11,
+			closedByDefault = true
+	)
+	String SECTION_BOARD_SCREENSHOT = "boardScreenshotSection";
+
 	/**
 	 * General Section
 	 */
@@ -961,5 +969,56 @@ public interface TheatreQOLConfig extends Config
 	default boolean simplifyLootTracking()
 	{
 		return false;
+	}
+
+	/**
+	 * Board Screenshot Configs
+	 */
+	@ConfigItem(
+			keyName = "boardScreenshotEnable",
+			name = "Enable Screenshot Button",
+			description = "Adds a camera button to the TOB board that screenshots it and saves/copies to clipboard",
+			section = SECTION_BOARD_SCREENSHOT,
+			position = 0
+	)
+	default boolean boardScreenshotEnable()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+			keyName = "boardScreenshotWhiteIcon",
+			name = "White Camera Icon",
+			description = "Use a white camera icon instead of the default (needed for some resource packs)",
+			section = SECTION_BOARD_SCREENSHOT,
+			position = 1
+	)
+	default boolean boardScreenshotWhiteIcon()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "boardScreenshotWidgetGroup",
+			name = "Board Widget Group ID",
+			description = "Widget group ID of the TOB board panel to screenshot. Set to 0 when not yet configured.",
+			section = SECTION_BOARD_SCREENSHOT,
+			position = 2
+	)
+	default int boardScreenshotWidgetGroup()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "boardScreenshotWidgetChild",
+			name = "Board Widget Child ID",
+			description = "Widget child ID within the group above. Usually 0 for the root container.",
+			section = SECTION_BOARD_SCREENSHOT,
+			position = 3
+	)
+	default int boardScreenshotWidgetChild()
+	{
+		return 0;
 	}
 }
