@@ -30,6 +30,7 @@
 package com.tobqol;
 
 import com.tobqol.config.HPDisplayTypes;
+import com.tobqol.config.ScreenshotType;
 import com.tobqol.config.SupplyChestPreference;
 import com.tobqol.config.font.FontStyles;
 import com.tobqol.config.font.FontTypes;
@@ -128,6 +129,14 @@ public interface TheatreQOLConfig extends Config
 			closedByDefault = true
 	)
 	String LOOT_TRACKING_SECTION = "lootTrackingSection";
+
+	@ConfigSection(
+			name = "Screenshot Settings",
+			description = "Configuration settings for the plugin's screenshot features",
+			position = 11,
+			closedByDefault = true
+	)
+	String SCREENSHOT_SECTION = "screenshotSection";
 
 	/**
 	 * General Section
@@ -961,5 +970,22 @@ public interface TheatreQOLConfig extends Config
 	default boolean simplifyLootTracking()
 	{
 		return false;
+	}
+
+	/**
+	 * Screenshot Configs
+	 */
+	@ConfigItem(
+			name = "Screenshot on Completion",
+			keyName = "screenshotOnCompletion",
+			description = "- Automatically takes a screenshot when the raid is completed<br>" +
+							"* Board: Captures only the game canvas<br>" +
+							"* Full Screen: Captures the entire screen including all monitors",
+			position = 1,
+			section = SCREENSHOT_SECTION
+	)
+	default ScreenshotType screenshotOnCompletion()
+	{
+		return ScreenshotType.OFF;
 	}
 }

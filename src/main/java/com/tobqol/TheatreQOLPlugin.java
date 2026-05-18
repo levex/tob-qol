@@ -39,12 +39,14 @@ import com.tobqol.api.game.Instance;
 import com.tobqol.api.game.RaidConstants;
 import com.tobqol.api.game.Region;
 import com.tobqol.api.util.CustomChatClient;
+import com.tobqol.config.ScreenshotType;
 import com.tobqol.config.SupplyChestPreference;
 import com.tobqol.loottracking.LootItems;
 import com.tobqol.loottracking.LootTrackingHandler;
 import com.tobqol.loottracking.LootTrackingMemory;
 import com.tobqol.rooms.RemovableOverlay;
 import com.tobqol.rooms.RoomHandler;
+import com.tobqol.rooms.verzik.commons.VerzikMap;
 import com.tobqol.rooms.bloat.BloatHandler;
 import com.tobqol.rooms.maiden.MaidenHandler;
 import com.tobqol.rooms.nylocas.NylocasHandler;
@@ -69,10 +71,13 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemStack;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.DrawManager;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
+import net.runelite.client.util.ImageCapture;
+import net.runelite.client.util.ImageUploadStyle;
 import net.runelite.client.util.Text;
 
 import javax.annotation.CheckForNull;
@@ -80,7 +85,10 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -201,6 +209,12 @@ public class TheatreQOLPlugin extends Plugin
 
 	@Inject
 	private ScheduledExecutorService executor;
+
+	@Inject
+	private DrawManager drawManager;
+
+	@Inject
+	private ImageCapture imageCapture;
 
 	@Override
 	public void configure(Binder binder)
@@ -576,6 +590,50 @@ public class TheatreQOLPlugin extends Plugin
 		{
 			reset(false);
 		}
+
+		if (event.getType() == ChatMessageType.GAMEMESSAGE && config.screenshotOnCompletion() != ScreenshotType.OFF)
+		{
+			if (VerzikMap.VERZIK_WAVE.matcher(Text.removeTags(event.getMessage())).find())
+			{
+				takeRaidCompletionScreenshot();
+			}
+		}
+	}
+
+	private void takeRaidCompletionScreenshot()
+	{
+		String fileName = "ToB-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+
+		if (config.screenshotOnCompletion() == ScreenshotType.FULL_SCREEN)
+		{
+			executor.submit(() ->
+			{
+				try
+				{
+					Robot robot = new Robot();
+					Rectangle bounds = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+					BufferedImage image = robot.createScreenCapture(bounds);
+					imageCapture.takeScreenshot(image, fileName, "ToB QoL", false, ImageUploadStyle.NEITHER);
+				}
+				catch (AWTException e)
+				{
+					log.warn("Failed to take full screen screenshot", e);
+				}
+			});
+			return;
+		}
+
+		drawManager.requestNextFrameListener(image ->
+		{
+			executor.submit(() ->
+			{
+				BufferedImage screenshot = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+				Graphics g = screenshot.getGraphics();
+				g.drawImage(image, 0, 0, null);
+				g.dispose();
+				imageCapture.takeScreenshot(screenshot, fileName, "ToB QoL", false, ImageUploadStyle.NEITHER);
+			});
+		});
 	}
 
 	@Nullable
